@@ -1,0 +1,281 @@
+<html>
+    <head>
+        <title></title>
+        
+        <link rel="stylesheet" href="css/timeline.css" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
+        <script src="js/event.js"></script>
+        
+        <script src="https://d3js.org/d3.v4.js"></script>
+        <!--<script src="https://d3js.org/d3.v4.min.js"></script>-->
+
+        <script>
+            scope = null
+
+            // node object
+            function Node(id) {
+                return {
+                    id: id || 0,
+                    value: true,
+                    parent: null,
+                    children: [],
+                    appendChild: function(node) {
+                        node.parent = this;
+                        this.children.push(node);
+                        return node;
+                    },
+                    toString: function() {
+                        return "Node: " + this.id + "\nChildren: " + this.children.length + "\nParent: " + (this.parent != null ? this.parent.id : "none");
+                    }
+                };
+            };
+
+            angular.module('timelineApp', ['timeline.event'])
+            .value('offset', 0)
+            .controller('timelineController', ['$scope', '$http', function($scope, $http) {
+                $scope.init = function() {
+                    $scope.flash = {};
+                    $scope.style = {
+                        timeline: {}
+                    };
+
+                    // $scope.fight = "a7s";
+                    $scope.fight = "test3";
+                    $http({
+                        url: $scope.fight + ".json"
+                    }).then(function(response) {
+                        console.log(response.data);
+                        $scope.events = response.data.events;
+                        $scope.timeline = response.data.timeline;
+                        $scope.nodes = [];
+                        $scope.maxLength = 0;
+                        $scope.maxDepth = 0;
+                        // $scope.length = $scope.getLength($scope.timeline);
+
+
+                        // $scope.parseTimeline($scope.timeline, 0, 0);
+                        var rootNode = $scope.recurseTimeline($scope.timeline, [{next: []}], 0);
+
+                        console.log(rootNode);
+                        $scope.calculateSequence($scope.nodes[0], 0);
+                        $scope.calculateDepth($scope.nodes);
+                        $scope.style.timeline.width = $scope.maxLength*10 + 'px';
+                    }, function(response) {
+                        $scope.flash.load = { title: "Load error", error: "Could not load fight info." }
+                    });
+
+
+                    scope = $scope;
+                };
+
+                $scope.getLength = function(timeline) {
+                    var time = 0;
+
+                    for (e in timeline) {
+                        event = timeline[e];
+                        if (Array.isArray(event))
+                            time = Math.max(time, $scope.getLength(event));
+                        else
+                            time = Math.max(time, event.time);
+                    }
+
+                    return time;
+                };
+                
+                // $scope.parseTimeline = function(timeline, level, ind) {
+                //     for (e in timeline) {
+                //         event = timeline[e];
+                //         if (Array.isArray(event)) {
+                //             $scope.parseTimeline(event, level+1, ind);
+                //             if (level % 2 == 1)
+                //                 ind++;
+                //         } else {
+                //             console.log(event.time + ": " + event.name + " - " + level + ", " + ind)
+                //             event.ind = ind;
+                //             event.level = level;
+                //         }
+                //     }
+                // };
+
+                // $scope.recurseTimeline = function(timeline, previous, depth) {
+                //     var precurse = [];
+                //     var recursing = false;
+                //     var event = null;
+
+                //     for (e in timeline) {
+                //         if ($scope.rootNode == undefined)
+                //             $scope.rootNode = event;
+
+                        
+                //         event = timeline[e];
+
+                //         if (Array.isArray(event)) {
+                //             var recursed = $scope.recurseTimeline(event, previous, depth + 1);
+
+                //             for (n in recursed)
+                //                 precurse.push(recursed[n]);
+                //         } else {
+                //             $scope.maxLength = Math.max($scope.maxLength, event.time)
+                //             event.next = [];
+                //             // event.level = 
+                            
+                //             if (precurse.length > 0) {
+                //                 for (p in precurse)
+                //                     precurse[p].next.push(event);
+                //             } else {
+                //                 for (p in previous)
+                //                     previous[p].next.push(event);
+                //             }
+
+                //             $scope.nodes.push(event);
+                            
+                //             previous = [event];
+                //         }
+                //     }
+
+                //     return (precurse.length > 0) ? precurse : [event];
+                // };
+
+                $scope.recurseTimeline = function(timeline, previous, depth) {
+                    var precurse = [];
+                    var event = null;
+                    for (e in timeline) {
+                        if ($scope.rootNode == undefined)
+                            $scope.rootNode = event;
+                        event = timeline[e];
+                        if (Array.isArray(event)) {
+                            var recursed = $scope.recurseTimeline(event, previous, depth + 1);
+                            for (n in recursed)
+                                precurse.push(recursed[n]);
+                        } else {
+                            event.next = [];
+                            
+                            if (precurse.length > 0) {
+                                for (p in precurse)
+                                    precurse[p].next.push(event);
+                                precurse = [];
+                            } else {
+                                for (p in previous)
+                                    previous[p].next.push(event);
+                            }
+                            $scope.nodes.push(event);
+                            
+                            previous = [event];
+                        }
+                    }
+                    return (precurse.length > 0) ? precurse : [event];
+                };
+
+                // $scope.calculateDepth = function(nodes) {
+                //     for (n in nodes) {
+                //         var ind = 0;
+                //         var count = nodes[n].next.length;
+                //         for (m in nodes[n].next) {
+                //             if (nodes[n].next[m].rank === undefined) {
+                //                 nodes[n].next[m].rank = ind;
+                //                 nodes[n].next[m].count = count;
+                //             }
+                //             ind++;
+                //         }
+                //     } 
+
+                //     console.log(nodes);
+                //     return nodes;
+                // };
+
+                $scope.calculateSequence = function(thisNode, depth) {
+                    thisNode.visited = true;
+                    thisNode.seq = depth
+
+                    for (var i = 0; i < thisNode.next.length; i++)
+                        if (thisNode.next[i].visited === undefined)
+                            this.calculateSequence(thisNode.next[i], depth + 1);
+                };
+
+                $scope.calculateDepth = function(nodes) {
+                    var nodesCopy = nodes.slice(0);
+
+                    for (n in nodes) {
+                        nodes[n].depth = 0;
+                        var seq = nodes[n].seq;
+                        for (m in nodesCopy) {
+                            if (nodesCopy[m].seq == nodes[n].seq) {
+                                nodes[n].depth++;
+                            }
+                        }
+                    }
+                }
+
+                $scope.depthFirst = function(thisNode, depth) {
+                    var padding = "";
+                    for (var i = 0; i < depth; i++)
+                        padding += "\t";
+
+                    console.log("[" + depth + "]\t" + padding + thisNode.name + ":" + thisNode.info);
+
+                    thisNode.visited = true;
+
+                    for (var i = 0; i < thisNode.next.length; i++)
+                        if (thisNode.next[i].visited === undefined)
+                            this.depthFirst(thisNode.next[i], depth + 1);
+                };
+
+                $scope.breadthFirst = function(thisNode) {}
+
+                $scope.click = function(node) {
+                    console.log("Name: " + node.name);
+                    console.log("Time: " + node.time);
+                    console.log("Info: " + node.info);
+                    console.log("Next: ");
+                    for (n in node.next) {
+                        console.log("\t" + node.next[n].name);
+                    }
+                    console.log("\n\n");
+                }
+
+            }])
+            .directive('phase', ['offset', function(offset) {
+                offset = offset || 0;
+                return {
+                    restrict: 'E',
+                    scope: '=',
+                    link: function($scope, $element, $attrs) {
+                        console.log("phase change");
+                    }
+                }
+            }]);
+
+            function test(n) {
+                console.log(n);
+                
+                if (n == 0) {
+                    console.log("done");
+                } else {
+                    console.log("recursing");
+                    test(n-1);
+                }
+            }
+        </script>
+    </head>
+
+    <body ng-app="timelineApp" ng-controller="timelineController" ng-init="init()">
+        <div class="flash" ng-repeat="message in flash">
+            <span ng-bind="message.title"></span>:
+            <span ng-bind="message.error"></span>
+        </div>
+
+        <!--<button ng-click="recurseTimeline(timeline, 0)">metrics</button>-->
+        <!--<button ng-click="parseTimeline(timeline, 0)">metrics</button>-->
+        <!--<div ng-bind="maxLength"></div>-->
+        <!--<timeline ng-style="style.timeline">-->
+
+        <div class="timeline" ng-style="style.timeline">
+            <!--<div class="tl line"></div>-->
+
+            <span ng-repeat="node in nodes">
+                <span class="dot" ng-style="{ left: node.time*10 }" ng-click="click(node)"></span>
+            </span>
+        </div>
+    </body>
+</html>
