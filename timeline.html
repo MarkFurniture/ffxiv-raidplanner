@@ -52,9 +52,11 @@
                     var trailingSpace = 100;
                     var jQContainer = $('#container')[0];
                     var tooltip = d3.select(".tooltip");
+                    var xOffset = 10 + timeline.dotRadius;
+                    var lineElevation = 0.25 * timeline.dotRadius;
                     var container = d3.select("#container")
                                       .append("svg")
-                                      .attr("width", timeline.bounds.maxWidth + 2*timeline.dotRadius + trailingSpace)
+                                      .attr("width", 3*xOffset + (timeline.bounds.maxTime + (10 - timeline.bounds.maxTime % 10)) * timeline.hScale)
                                       .attr("height", timeline.bounds.totalHeight + timeline.topPadding + timeline.bottomPadding);
                    
                     var defs = container.append("defs");
@@ -67,6 +69,8 @@
                     var timelineLine = d3.line()
                                          .x(function(d) { return d.left; })
                                          .y(function(d) { return d.top; });
+
+                    
 
                     // create filter for glow
                     var filter = defs.append("filter")
@@ -82,20 +86,6 @@
                           .attr("in", "SourceGraphic")
                           .attr("in2", "blur")
                           .attr("mode", "normal");
-
-                    // create filter for anti glow
-                    // var filter = defs.append("filter")
-                    //                  .attr("id","antiglow")
-                    //                  .attr('filterUnits', "userSpaceOnUse")
-                    //                  .attr("width", "300%")
-                    //                  .attr("height", "300%");
-                    // filter.append("feGaussianBlur")
-                    //       .attr("in", "SourceAlpha")
-                    //       .attr("stdDeviation","5.5")
-                    //       .attr("result","blur");
-                    // filter.append("feBlend")
-                    //       .attr("in", "SourceGraphic")
-                    //       .attr("mode", "normal");
 
                     // create pattern for including images on nodes
                     for (e in timeline.events) {
@@ -116,16 +106,16 @@
                     // draw the time line
                     container.append("path")
                              .attr("d", timelineLine([
-                                 { left: 10, top: timeline.bounds.totalHeight + timeline.topPadding + timeline.bottomPadding - 40 - timeline.dotRadius },
-                                 { left: timeline.bounds.maxWidth, top: timeline.bounds.totalHeight + timeline.topPadding + timeline.bottomPadding - 40 - timeline.dotRadius }]))
+                                 { left: xOffset,
+                                   top: timeline.bounds.totalHeight + timeline.topPadding + timeline.bottomPadding - 40 - timeline.dotRadius },
+                                 { left: xOffset + (timeline.bounds.maxTime + (10 - timeline.bounds.maxTime % 10)) * timeline.hScale,
+                                   top: timeline.bounds.totalHeight + timeline.topPadding + timeline.bottomPadding - 40 - timeline.dotRadius }]))
                              .attr("stroke", "grey")
                              .attr("fill", "none");
                     var i = 0;
 
                     // draw time markers up to the next multiple of ten past the end
                     while (i <= timeline.bounds.maxTime + (10 - timeline.bounds.maxTime % 10)) {
-                        var xOffset = 10 + timeline.dotRadius;
-                        var lineElevation = 0.25 * timeline.dotRadius;
                         var yCoefficient = (i % 10 == 0) ? 2 : 1;
                         var strokeWidth = (i % 10 == 0) ? "2px" : "1px";
                         var from = {
@@ -157,9 +147,7 @@
                         
                         i++;
                     }
-                    
- 
-                    
+
                     // draw links
                     timeline.links.shift();
                     for (l in timeline.links) {
@@ -169,15 +157,50 @@
                                  .attr("fill", "none");
                     }
 
+                    // connecting lines
+                    for (n in timeline.nodes) {
+                        var thisNode = timeline.nodes[n];
+                        var from = {
+                            left: xOffset + thisNode.left, 
+                            top: thisNode.top + timeline.topPadding + timeline.bottomPadding + timeline.dotRadius
+                        }
+                        var to = {
+                            left: xOffset + thisNode.left, 
+                            top: timeline.bounds.totalHeight + timeline.topPadding + timeline.bottomPadding - 40 - timeline.dotRadius
+                        }
+
+                        container.append("path")
+                                 .datum(timeline.nodes[n])
+                                 .classed("timeline-line", true)
+                                 .attr("d", timelineLine([from, to]))
+                                 .attr("stroke", "green");
+                        container.append("circle")
+                                 .datum(timeline.nodes[n])
+                                 .classed("timeline-dot", true)
+                                 .attr("cx", xOffset + thisNode.left)
+                                 .attr("cy", timeline.bounds.totalHeight + timeline.topPadding + timeline.bottomPadding - 40 - timeline.dotRadius)
+                                 .on("mouseover", function(e) {
+                                     container.selectAll(".timeline-line")
+                                              .classed("hover", function(e) { return e.hover; });
+                                     container.selectAll(".timeline-dot")
+                                              .classed("hover", function(e) { return e.hover; });
+                                 })
+                                 .on("mouseout", function(n) {
+                                     container.selectAll(".timeline-line")
+                                              .classed("hover", function(n) { return n.hover; });
+                                     container.selectAll(".timeline-dot")
+                                              .classed("hover", function(n) { return n.hover; });
+                                 });
+                    }
+
                     container.selectAll(".nodeImage")
                              .data(timeline.nodes)
                              .enter()
                              .append("rect")
-                            //  .attr("class", "nodeImage")
                              .classed("nodeImage", true)
                              .classed("selected", function(n) { return n.selected; })
                              .attr("y", function(n) { return n.top + Math.abs(timeline.bounds.minHeight) + timeline.topPadding; })
-                             .attr("x", function(n) { return n.left + timeline.dotRadius; })
+                             .attr("x", function(n) { return n.left + 0.5 * timeline.dotRadius; })
                              .attr("rx", function(n) { return timeline.dotRadius/3; })
                              .attr("ry", function(n) { return timeline.dotRadius/3; })
                              .attr("width", function(n) { return timeline.dotRadius*2; })
@@ -188,22 +211,20 @@
                     container.selectAll(".nodes")
                              .data(timeline.nodes)
                              .enter()
-                            //  .append("svg:circle")
-                            //  .attr("cx", function(n) { return n.left + timeline.dotRadius; })
-                            //  .attr("cy", function(n) { return n.top + Math.abs(timeline.bounds.minHeight) + timeline.dotRadius + timeline.hPadding; })
-                            //  .attr("r", function(n) { return timeline.dotRadius; })
+
                              .append("rect")
                              .classed("nodes", true)
                              .attr("y", function(n) { return n.top + Math.abs(timeline.bounds.minHeight) + timeline.topPadding; })
-                             .attr("x", function(n) { return n.left + timeline.dotRadius; })
+                             .attr("x", function(n) { return n.left + 0.5 * timeline.dotRadius; })
                              .attr("rx", function(n) { return timeline.dotRadius/3; })
                              .attr("ry", function(n) { return timeline.dotRadius/3; })
                              .attr("width", function(n) { return timeline.dotRadius*2; })
                              .attr("height", function(n) { return timeline.dotRadius*2; })
-                            //  .style("fill", function(n) { return "url(#" + n.name + ")"; })
-                             .style("filter", "url(#antiglow)")
+                             .style("fill", function(n) { return "url(#" + n.name + ")"; })
+                             .style("filter", "none")
                              .style("cursor", "pointer")
                              .on("mouseover", function(n) {
+                                n.hover = true;
                                 var e = timeline.events[n.name];
                                 
                                 d3.select(".tooltip .name")
@@ -224,20 +245,23 @@
                                 var x = Math.max(d3.event.pageX - timeline.tooltip.width / 2, 10);
                                 var y = $($('svg')[0]).position().top + n.top + Math.abs(timeline.bounds.minHeight) + timeline.dotRadius + timeline.topPadding - $($('.tooltip')[0]).height();
 
-                                d3.select(this)
-                                //   .style("fill", "#aaa")
-                                //   .style("fill", "url(#sizzlebeam)")
-                                  .style("filter", "url(#glow)");
+                                d3.select(this).style("filter", "url(#glow)");
                                 
                                 tooltip.transition()
                                        .duration(100)
                                        .style("opacity", 0.9);
                                 tooltip.style("left", x + "px")
                                        .style("top", y - 50 + "px");
+                                
+                                container.selectAll(".timeline-line")
+                                         .classed("hover", function(e) { return e.hover; });
+                                container.selectAll(".timeline-dot")
+                                         .classed("hover", function(e) { return e.hover; });
                              })
                              .on("mouseout", function(n) {
-                                d3.select(this)
-                                  .style("filter", "url(#antiglow)");
+                                n.hover = false;
+
+                                d3.select(this).style("filter", "none");
 
                                 tooltip.transition()		
                                        .duration(100)		
@@ -247,6 +271,13 @@
                                               .style("left", "-1000px")
                                               .style("top", "-1000px");
                                        });
+                                
+                                container.selectAll(".timeline-line")
+                                         .classed("hover", function(n) { return n.hover; });
+                                container.selectAll(".timeline-dot")
+                                         .classed("hover", function(n) { return n.hover; });
+                                container.selectAll(".nodeImage")
+                                          .classed("selected", function (n) { return n.selected; });
                              })
                              .on("click", function(n) {
                                  console.log({ id: n.name, left: n.left, top: n.top, selected: n.selected });
@@ -262,8 +293,43 @@
                                  // update the underlying shape
                                  container.selectAll(".nodeImage")
                                           .classed("selected", function (n) { return n.selected; });
+                                 container.selectAll(".timeline-dot")
+                                          .classed("selected", function(n) { return n.selected; });                                        
                              });
                     
+                    // add the planning bar
+                    var g = container.append("g")
+                            .on("mouseenter", function() {
+                                //  var x = d3.event.x + $("#container").scrollLeft() - $(window).width();
+                                 var x = d3.event.x - timeline.dotRadius + $("#container").scrollLeft();
+                                 g.append("rect")
+                                   .classed("placing", true)
+                                   .attr("x", x)
+                                   .attr("y", 1)
+                                   .attr("rx", 5)
+                                   .attr("ry", 5)
+                                   .attr("width", 2*timeline.dotRadius)
+                                   .attr("height", 2*timeline.dotRadius)
+                                   .attr("fill", "#777")
+                                   .attr("stroke", "white");
+                             })
+                             .on("mousemove", function() {
+                                 d3.select(".placing")
+                                   .attr("x", d3.event.x - timeline.dotRadius + $("#container").scrollLeft())
+                             })
+                             .on("mouseleave", function() {
+                                 d3.select(".placing").remove();
+                             });
+                    g.append("rect")
+                             .classed("planning-bar", true)
+                             .attr("x", xOffset)
+                             .attr("y", 1)
+                             .attr("width", (timeline.bounds.maxTime + (10 - timeline.bounds.maxTime % 10)) * timeline.hScale)
+                             .attr("height", 2*timeline.dotRadius)
+                             .style("cursor", "pointer")
+                             .style("pointer-events", "all");
+                    
+                    // drag functionality
                     container.call(d3.drag()
                              .on("drag", function() {
                                  var delta = startDragX - d3.event.x;
@@ -373,23 +439,12 @@
                             var x2 = second.left === undefined ? 0 : second.left + hScale;
                             var y2 = second.top === undefined ? 0 : second.top;
 
+                            // add two control points to get a nice bezier curve
                             timeline.links.push([
-                                { // start point
-                                    top: y1,
-                                    left: x1
-                                },
-                                { // control point 1
-                                    top: y1,
-                                    left: (x1 + x2) / 2 - ((x2 - x1) / 4)
-                                },
-                                { // control point 2
-                                    top: y2,
-                                    left: (x1 + x2) / 2 + ((x2 - x1) / 4)
-                                },
-                                { // end point
-                                    top: y2,
-                                    left: x2
-                                }
+                                { top: y1, left: x1 },
+                                { top: y1, left: (x1 + x2) / 2 - ((x2 - x1) / 4) },
+                                { top: y2, left: (x1 + x2) / 2 + ((x2 - x1) / 4) },
+                                { top: y2, left: x2 }
                             ]);
                         }
 

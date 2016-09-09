@@ -148,3 +148,35 @@ body {
     font-size: 0.8em;
     fill: #bbb;
 }
+
+.timeline-line {
+    stroke: #777;
+    stroke-dasharray: 1,2;
+    z-index: -1;
+}
+
+.timeline-line.hover {
+    stroke: #fff;
+}
+
+.timeline-dot {
+    stroke: #aaa;
+    r: 5px;
+}
+
+.timeline-dot.hover {
+    stroke: #fff;
+    r: 7px;
+}
+
+.timeline-dot.selected {
+    stroke: #fff;
+    fill: #676fa2;
+    r: 7px;
+}
+
+.planning-bar {
+    /*fill: none;*/
+    fill: #444;
+    stroke: #aaa;
+}

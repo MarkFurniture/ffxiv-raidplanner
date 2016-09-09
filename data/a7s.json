@@ -47,7 +47,7 @@
                 "stun_heart":     { "name": "Stun heart", "description": "Heart should be stunned", "duration": 20, "icon": "highwire.png",
                                     "info": "PLD is ideal due to the long stun.",
                                     "screenshots": [] },
-                "enrage":         { "name": "Enrage", "description": "You gon die", "duration": 10, "icon": "",
+                "enrage":         { "name": "Enrage", "description": "You gon die", "duration": 10, "icon": "enrage.png",
                                     "info": "BURN EVERYTHING",
                                     "screenshots": [] }
             },
