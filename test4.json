@@ -1,0 +1,47 @@
+{   
+    "events": {
+        "phase_change":   { "name": "event_1", "description": "", "duration": 0, "icon": "",
+                            "info": "",
+                            "screenshots": [] },
+        "test_event":     { "name": "test_event", "description": "test_description", "duration": 10, "icon": "",
+                            "info": "test_info",
+                            "screenshots": [] }
+    },
+    "timeline": [
+            { "time": 0, "name": "event_1", "info": "Event 1" },
+            { "time": 10, "name": "event_2", "info": "Event 2" },
+            [
+                [
+                    [
+                        { "time": 20, "name": "event_3", "info": "Event 3" }
+                    ],
+                    [
+                        { "time": 20, "name": "event_3.5", "info": "Event 3.5" }
+                    ]
+                ],
+                [
+                    { "time": 30, "name": "event_4", "info": "Event 4" }
+                ],
+                { "time": 40, "name": "event_5", "info": "Event 5" }
+            ],
+            [
+                { "time": 20, "name": "event_6", "info": "Event 6" },
+                [
+                    { "time": 40, "name": "event_7", "info": "Event 7" }
+                ],
+                [
+                    { "time": 40, "name": "event_8", "info": "Event 8" }
+                ]
+            ],
+            { "time": 50, "name": "event_9", "info": "Event 9" },
+            { "time": 60, "name": "event_10", "info": "Event 10" },
+            [
+                { "time": 70, "name": "event_11", "info": "Event 11" }
+            ],
+            [
+                { "time": 70, "name": "event_12", "info": "Event 12" }
+            ],
+            { "time": 80, "name": "event_13", "info": "Event 13" },
+            { "time": 90, "name": "event_14", "info": "Event 14" }
+    ]
+}

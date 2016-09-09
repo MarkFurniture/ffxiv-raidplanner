@@ -1,0 +1,150 @@
+html,body {
+    width: 100%;
+    height: 100%;
+}
+
+html {
+    display: table;
+    
+}
+
+body {
+    /*display: table-cell;
+    vertical-align: middle;
+    padding: 20px;*/
+    margin: 0;
+    padding: 5px;
+    background: #2f2f2f;
+}
+
+#container {
+    position: fixed;
+    bottom: 0;
+    /*position: absolute;*/
+    /*top: 50%;*/
+    width: 100%;
+    overflow: auto;
+    /*transform: translateY(-25%);*/
+    cursor: grab;
+    cursor: -moz-grab;
+    cursor: -webkit-grab;
+}
+
+#container:active {
+    cursor: grabbing;
+    cursor: -moz-grabbing;
+    cursor: -webkit-grabbing;
+}
+
+.timeline {
+    display: inline-block;
+    background: #ddd;
+    min-width: 50px;
+}
+
+.line {
+    height: 1px;
+    background: #999;
+    width: 100%;
+}
+
+.event-object {
+    position: absolute;
+}
+
+/*div.tooltip {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    padding: 10px;
+    background: white;
+    border: 1px solid grey;
+    border-radius: 5px;
+}*/
+
+div.hidden {
+    top: 5px;
+    left: 5px;
+}
+
+body {
+    background: #2f2f2f;
+    font-family: 'Open Sans';
+}
+.tooltip {
+    color: #e8e8e8;
+    background: #5f5f5f;
+    display: inline-block;
+    border: 1px solid white;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 0.8em;
+    box-shadow: 0 0 20px #bbb;
+    opacity: 0;
+    position: absolute;
+    width: 300px;
+}
+
+.nodes {
+    /*stroke: #fff;*/
+    /*fill: #777;*/
+    pointer-events: all;
+}
+
+.nodeImage {
+    stroke: #777;
+    fill: #444;
+    pointer-events: all;    
+}
+
+.nodeImage.selected {
+    stroke: #fff;
+    fill: #676fa2;
+}
+
+.tooltip .heading {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.tooltip .subheading {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.tooltip > .name {
+    float: left;
+    display: inline-block;
+    margin-left: 5px;
+}
+
+.tooltip > .icon {
+    float: left;
+    display: inline-block;
+}
+
+.tooltip > .time {
+    float: right;
+    display: inline-block;
+    text-align: center;
+}
+
+.tooltip > .time > .seconds {
+    font-style: italic;
+}
+
+.tooltip > .description {
+    clear: both;
+    margin-top: 5px;
+}
+
+.tooltip > .images .thumb {
+    height: 50px;
+    width: 50px;
+}
+
+.timeline-label {
+    font-family: 'Open Sans';
+    font-size: 0.8em;
+    fill: #bbb;
+}
