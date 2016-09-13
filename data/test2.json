@@ -1,4 +1,8 @@
-{   
+{
+    "resources": {
+        "icons": "resources/a7s/icons/",
+        "screenshots": "resources/a7s/screenshots/"
+    },
     "events": {
         "phase_change":   { "name": "event_1", "description": "", "duration": 0, "icon": "",
                             "info": "",

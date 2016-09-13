@@ -1,0 +1,67 @@
+{
+    "jobList" : [
+        "ast",
+        "blm",
+        "brd",
+        "drg",
+        "drk",
+        "mch",
+        "mnk",
+        "nin",
+        "pld",
+        "sch",
+        "smn",
+        "war",
+        "whm"
+    ],
+    "jobs": {
+        "sch": {
+            "skills": {
+                "adloquium":            { "name": "Adloquium", "cooldown": "", "duration": "", "cast_time": "", "icon": "adloquium.png" },
+                "aetherflow":           { "name": "Aetherflow", "cooldown": "", "duration": "", "cast_time": "", "icon": "aetherflow.png" },
+                "away":                 { "name": "Away", "cooldown": "", "duration": "", "cast_time": "", "icon": "away.png" },
+                "bane":                 { "name": "Bane", "cooldown": "", "duration": "", "cast_time": "", "icon": "bane.png" },
+                "bio":                  { "name": "Bio", "cooldown": "", "duration": "", "cast_time": "", "icon": "bio.png" },
+                "bio_ii":               { "name": "Bio II", "cooldown": "", "duration": "", "cast_time": "", "icon": "bio_ii.png" },
+                "broil":                { "name": "Broil", "cooldown": "", "duration": "", "cast_time": "", "icon": "broil.png" },
+                "deployment_tactics":   { "name": "Deployment Tactics", "cooldown": "", "duration": "", "cast_time": "", "icon": "deployment_tactics.png" },
+                "dissipation":          { "name": "Dissipation", "cooldown": "", "duration": "", "cast_time": "", "icon": "dissipation.png" },
+                "embrace":              { "name": "Embrace", "cooldown": "", "duration": "", "cast_time": "", "icon": "embrace.png" },
+                "emergency_tactics":    { "name": "Emergency Tactics", "cooldown": "", "duration": "", "cast_time": "", "icon": "emergency_tactics.png" },
+                "energy_drain":         { "name": "Energy Drain", "cooldown": "", "duration": "", "cast_time": "", "icon": "energy_drain.png" },
+                "eye_for_an_eye":       { "name": "Eye for an Eye", "cooldown": "", "duration": "", "cast_time": "", "icon": "eye_for_an_eye.png" },
+                "fey_caress":           { "name": "Fey Caress", "cooldown": "", "duration": "", "cast_time": "", "icon": "fey_caress.png" },
+                "fey_covenant":         { "name": "Fey Covenant", "cooldown": "", "duration": "", "cast_time": "", "icon": "fey_covenant.png" },
+                "fey_illumination":     { "name": "Fey Illumination", "cooldown": "", "duration": "", "cast_time": "", "icon": "fey_illumination.png" },
+                "fey_wind":             { "name": "Fey Wind", "cooldown": "", "duration": "", "cast_time": "", "icon": "fey_wind.png" },
+                "guard":                { "name": "Guard", "cooldown": "", "duration": "", "cast_time": "", "icon": "guard.png" },
+                "heel":                 { "name": "Heel", "cooldown": "", "duration": "", "cast_time": "", "icon": "heel.png" },
+                "indomitability":       { "name": "Indomitability", "cooldown": "", "duration": "", "cast_time": "", "icon": "indomitability.png" },
+                "leeches":              { "name": "Leeches", "cooldown": "", "duration": "", "cast_time": "", "icon": "leeches.png" },
+                "lustrate":             { "name": "Lustrate", "cooldown": "", "duration": "", "cast_time": "", "icon": "lustrate.png" },
+                "miasma":               { "name": "Miasma", "cooldown": "", "duration": "", "cast_time": "", "icon": "miasma.png" },
+                "miasma_ii":            { "name": "Miasma II", "cooldown": "", "duration": "", "cast_time": "", "icon": "miasma_ii.png" },
+                "obey":                 { "name": "Obey", "cooldown": "", "duration": "", "cast_time": "", "icon": "obey.png" },
+                "physick":              { "name": "Physick", "cooldown": "", "duration": "", "cast_time": "", "icon": "physick.png" },
+                "place":                { "name": "Place", "cooldown": "", "duration": "", "cast_time": "", "icon": "place.png" },
+                "resurrection":         { "name": "Resurrection", "cooldown": "", "duration": "", "cast_time": "", "icon": "resurrection.png" },
+                "rouse":                { "name": "Rouse", "cooldown": "", "duration": "", "cast_time": "", "icon": "rouse.png" },
+                "ruin":                 { "name": "Ruin", "cooldown": "", "duration": "", "cast_time": "", "icon": "ruin.png" },
+                "ruin_ii":              { "name": "Ruin II", "cooldown": "", "duration": "", "cast_time": "", "icon": "ruin_ii.png" },
+                "sacred_soil":          { "name": "Sacred Soil", "cooldown": "", "duration": "", "cast_time": "", "icon": "sacred_soil.png" },
+                "shadow_flare":         { "name": "Shadow Flare", "cooldown": "", "duration": "", "cast_time": "", "icon": "shadow_flare.png" },
+                "sic":                  { "name": "Sic", "cooldown": "", "duration": "", "cast_time": "", "icon": "sic.png" },
+                "silent_dusk":          { "name": "Silent Dusk", "cooldown": "", "duration": "", "cast_time": "", "icon": "silent_dusk.png" },
+                "stay":                 { "name": "Stay", "cooldown": "", "duration": "", "cast_time": "", "icon": "stay.png" },
+                "steady":               { "name": "Steady", "cooldown": "", "duration": "", "cast_time": "", "icon": "steady.png" },
+                "succor":               { "name": "Succor", "cooldown": "", "duration": "", "cast_time": "", "icon": "succor.png" },
+                "summon":               { "name": "Summon", "cooldown": "", "duration": "", "cast_time": "", "icon": "summon.png" },
+                "summon_ii":            { "name": "Summon II", "cooldown": "", "duration": "", "cast_time": "", "icon": "summon_ii.png" },
+                "sustain":              { "name": "Sustain", "cooldown": "", "duration": "", "cast_time": "", "icon": "sustain.png" },
+                "virus":                { "name": "Virus", "cooldown": "", "duration": "", "cast_time": "", "icon": "virus.png" },
+                "whispering_dawn":      { "name": "Whispering Dawn", "cooldown": "", "duration": "", "cast_time": "", "icon": "whispering_dawn.png" }
+            }
+        }
+    }
+}
+

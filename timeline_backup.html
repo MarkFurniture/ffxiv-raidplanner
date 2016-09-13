@@ -18,26 +18,9 @@
 
 
         <script>
-            // extend d3 functionality
-            (function() {
-                d3.selection.prototype.moveToFront = function() {  
-                    return this.each(function(){
-                        this.parentNode.appendChild(this);
-                    });
-                };
-                d3.selection.prototype.moveToBack = function() {  
-                    return this.each(function() { 
-                        var firstChild = this.parentNode.firstChild; 
-                        if (firstChild) { 
-                            this.parentNode.insertBefore(this, firstChild); 
-                        } 
-                    });
-                };
-            })();
-
-            $(document).ready(function() { 
+            $(document).ready(function() {
                 timeline = {
-                    dataURL: "data/a7s.json",
+                    dataURL: "data/test2.json",
                     classURL: "data/classes/",
                     iconDir: "resources/icons/",
                     bounds: {},
@@ -49,7 +32,7 @@
                     dotRadius: 19,
                     nodes: [],
                     links: [],
-                    placed: {},
+                    placed: [],
                     selected: [],
                     selectedSkill: null,
                     selectedClass: "sch",
@@ -63,11 +46,7 @@
                 d3.json(timeline.classURL + timeline.selectedClass + ".json", function(data) {
                     console.log(data);
 
-                    var selectedSkill = "whispering_dawn";
-                    timeline.selectedSkill = {
-                        id: selectedSkill,
-                        data: data.skills[selectedSkill]
-                    };
+                    timeline.selectedSkill = data.skills["aetherflow"];
                 });
 
                 // get the fight data
@@ -86,6 +65,7 @@
                 var render = function(timeline) {
                     var trailingSpace = 100;
                     var jQContainer = $('#container')[0];
+                    var tooltip = d3.select(".tooltip");
                     var xOffset = 10 + timeline.dotRadius;
                     // var lineElevation = 0.25 * timeline.dotRadius;
                     var container = d3.select("#container")
@@ -93,28 +73,19 @@
                                       .attr("width", 3*xOffset + (timeline.bounds.maxTime + (10 - timeline.bounds.maxTime % 10)) * timeline.hScale)
                                       .attr("height", timeline.bounds.totalHeight + timeline.topPadding + timeline.bottomPadding);
                    
-                    // initialise defs for icons/effects
                     var defs = container.append("defs");
-                    initialiseDefs(defs, timeline);
+                    
+                    var lineFunction = d3.line()
+                                         .curve(d3.curveBasis)
+                                         .x(function(d) { return d.left; })
+                                         .y(function(d) { return d.top + Math.abs(timeline.bounds.minHeight) + timeline.dotRadius + timeline.topPadding; });
                     
                     var lineSegment = d3.line()
                                         .x(function(d) { return d.left; })
                                         .y(function(d) { return d.top; });
 
-                    // draw the time line
-                    renderTimeline(container, timeline, xOffset);
-                    // draw links
-                    renderLinks(container, timeline);
-                    // draw nodes and vertical connecting lines
-                    renderNodes(container, timeline, xOffset, lineSegment)
-                    // add the planning bar
-                    renderPlanningBar(container, timeline, xOffset);
-                    // drag functionality
-                    initDragBehaviour(container);
                     
-                };
 
-                var initialiseDefs = function(defs, timeline) {
                     // create filter for glow
                     var filter = defs.append("filter")
                                      .attr("id","glow")
@@ -145,15 +116,10 @@
                             .attr("height", "34px")
                             .attr("xlink:href", timeline.iconDir + timeline.events[e].icon);
                     }
-                }
 
-                var renderTimeline = function(svg, timeline, xOffset) {
-                    var lineElevation = 0.25 * timeline.dotRadius;
-                    var timelineLine = d3.line()
-                                         .x(function(d) { return d.left; })
-                                         .y(function(d) { return d.top; });
-
-                    svg.append("path")
+                    // // draw the time line
+                    // renderTimeline(container, timeline, xOffset)
+                    container.append("path")
                              .attr("d", timelineLine([
                                  { left: xOffset,
                                    top: timeline.bounds.totalHeight + timeline.topPadding + timeline.bottomPadding - 40 - timeline.dotRadius },
@@ -176,7 +142,7 @@
                             top: timeline.bounds.totalHeight + timeline.topPadding + timeline.bottomPadding - 40 - timeline.dotRadius + yCoefficient * lineElevation
                         }
 
-                        svg.append("path")
+                        container.append("path")
                                  .attr("d", timelineLine([from, to]))
                                  .attr("stroke", "grey")
                                  .attr("fill", "none")
@@ -184,7 +150,7 @@
                         
                         // apply a label every 10 segments
                         if (i % 10 == 0) {
-                            text = svg.append("text")
+                            text = container.append("text")
                                      .classed("timeline-label", true)
                                      .text(function(t) { return (i < 60) ? i + "s" : secondsAndMinutes(i); })
                                      .attr("x", function(t) {
@@ -196,26 +162,17 @@
                         
                         i++;
                     }
-                };
 
-                var renderLinks = function(svg, timeline) {
-                    var lineFunction = d3.line()
-                                         .curve(d3.curveBasis)
-                                         .x(function(d) { return d.left; })
-                                         .y(function(d) { return d.top + Math.abs(timeline.bounds.minHeight) + timeline.dotRadius + timeline.topPadding; });
-
+                    // draw links
                     timeline.links.shift();
                     for (l in timeline.links) {
-                        svg.append("path")
+                        container.append("path")
                                  .attr("d", lineFunction(timeline.links[l]))
                                  .attr("stroke", "grey")
                                  .attr("fill", "none");
                     }
-                };
 
-                var renderNodes = function(svg, timeline, xOffset, lineSegment) {
-                    var tooltip = d3.select(".tooltip");
-                    
+                    // connecting lines
                     for (n in timeline.nodes) {
                         var thisNode = timeline.nodes[n];
                         var from = {
@@ -227,31 +184,31 @@
                             top: timeline.bounds.totalHeight + timeline.topPadding + timeline.bottomPadding - 40 - timeline.dotRadius
                         }
 
-                        svg.append("path")
+                        container.append("path")
                                  .datum(timeline.nodes[n])
                                  .classed("timeline-line", true)
                                  .attr("d", lineSegment([from, to]))
                                  .attr("stroke", "green");
-                        svg.append("circle")
+                        container.append("circle")
                                  .datum(timeline.nodes[n])
                                  .classed("timeline-dot", true)
                                  .attr("cx", xOffset + thisNode.left)
                                  .attr("cy", timeline.bounds.totalHeight + timeline.topPadding + timeline.bottomPadding - 40 - timeline.dotRadius)
                                  .on("mouseover", function(e) {
-                                     svg.selectAll(".timeline-line")
+                                     container.selectAll(".timeline-line")
                                               .classed("hover", function(e) { return e.hover; });
-                                     svg.selectAll(".timeline-dot")
+                                     container.selectAll(".timeline-dot")
                                               .classed("hover", function(e) { return e.hover; });
                                  })
                                  .on("mouseout", function(n) {
-                                     svg.selectAll(".timeline-line")
+                                     container.selectAll(".timeline-line")
                                               .classed("hover", function(n) { return n.hover; });
-                                     svg.selectAll(".timeline-dot")
+                                     container.selectAll(".timeline-dot")
                                               .classed("hover", function(n) { return n.hover; });
                                  });
                     }
 
-                    svg.selectAll(".nodeImage")
+                    container.selectAll(".nodeImage")
                              .data(timeline.nodes)
                              .enter()
                              .append("rect")
@@ -266,7 +223,7 @@
                             //  .style("fill", function(n) { return "#777"; })
                              .style("cursor", "pointer");
 
-                    svg.selectAll(".nodes")
+                    container.selectAll(".nodes")
                              .data(timeline.nodes)
                              .enter()
 
@@ -311,9 +268,9 @@
                                 tooltip.style("left", x + "px")
                                        .style("top", y - 50 + "px");
                                 
-                                svg.selectAll(".timeline-line")
+                                container.selectAll(".timeline-line")
                                          .classed("hover", function(e) { return e.hover; });
-                                svg.selectAll(".timeline-dot")
+                                container.selectAll(".timeline-dot")
                                          .classed("hover", function(e) { return e.hover; });
                              })
                              .on("mouseout", function(n) {
@@ -330,11 +287,11 @@
                                               .style("top", "-1000px");
                                        });
                                 
-                                svg.selectAll(".timeline-line")
+                                container.selectAll(".timeline-line")
                                          .classed("hover", function(n) { return n.hover; });
-                                svg.selectAll(".timeline-dot")
+                                container.selectAll(".timeline-dot")
                                          .classed("hover", function(n) { return n.hover; });
-                                svg.selectAll(".nodeImage")
+                                container.selectAll(".nodeImage")
                                           .classed("selected", function (n) { return n.selected; });
                              })
                              .on("click", function(n) {
@@ -349,15 +306,14 @@
                                  }
 
                                  // update the underlying shape
-                                 svg.selectAll(".nodeImage")
+                                 container.selectAll(".nodeImage")
                                           .classed("selected", function (n) { return n.selected; });
-                                 svg.selectAll(".timeline-dot")
+                                 container.selectAll(".timeline-dot")
                                           .classed("selected", function(n) { return n.selected; });                                        
                              });
-                };
-
-                var renderPlanningBar = function(svg, timeline, xOffset) {
-                    var g = svg.append("g");
+                    
+                    // add the planning bar
+                    var g = container.append("g")
                                     //  .on("mouseenter", function() {
                                     //      //  var x = d3.event.x + $("#container").scrollLeft() - $(window).width();
                                     //     //  var x = Math.max(xOffset, d3.event.x - timeline.dotRadius + $("#container").scrollLeft());
@@ -386,71 +342,33 @@
                                     //  .on("mouseleave", function() {
                                     //      d3.select(".placing").remove();
                                     //  })
-                               g.on("click", function() {
+                                     .on("click", function() {
+                                         var xCalc = d3.event.x - timeline.dotRadius + $("#container").scrollLeft();
+                                         var xMax = (timeline.bounds.maxTime + (10 - timeline.bounds.maxTime % 10)) * timeline.hScale;// - timeline.dotRadius;
+                                         var x = clamp(xOffset, xCalc, xMax);
 
-                                    var xCalc = d3.event.x - timeline.dotRadius + $("#container").scrollLeft();
-                                    var xMax = (timeline.bounds.maxTime + (10 - timeline.bounds.maxTime % 10)) * timeline.hScale;// - timeline.dotRadius;
-                                    var x = clamp(xOffset, xCalc, xMax);
+                                         var placed = g.append("rect")
+                                                       .classed("placed", true)
+                                                       .attr("x", x)
+                                                       .attr("width", 2*timeline.dotRadius)
+                                                       .attr("height", 2*timeline.dotRadius)
+                                                       .on("click", function() {
+                                                           d3.event.stopPropagation();
+                                                           d3.select(this).remove();
+                                                           return false;
+                                                       });
+                                         placed.call(d3.drag()
+                                                       .on("drag", function() {
+                                                            // var xCalc = d3.event.x - timeline.dotRadius + $("#container").scrollLeft();
+                                                            var xCalc = d3.event.x - timeline.dotRadius + $("#container").scrollLeft();
+                                                            var xMax = (timeline.bounds.maxTime + (10 - timeline.bounds.maxTime % 10)) * timeline.hScale;// - timeline.dotRadius;
+                                                            var x = clamp(xOffset, xCalc, xMax);
+                                                            d3.select(this)
+                                                              .attr("x", x);
+                                                       }));
 
-                                    // if (!checkCooldownIntersection(timeline.placed, timeline.selectedSkill, x))
-                                    //     return false;
-
-                                    // var placedDuration = g.append("rect")
-                                    //                       .classed("placed-duration", true)
-                                    //                       .attr("x", x + timeline.dotRadius)
-                                    //                       .attr("y", timeline.dotRadius + 1)
-                                    //                       .attr("width", timeline.selectedSkill.data.duration * timeline.hScale)
-                                    //                       .attr("height", timeline.dotRadius - 1)
-                                    //                       .style("fill", "#7f8ee2")
-                                    //                       .style("stroke", "#8f9ef2");
-
-                                    // var placedCooldown = g.append("rect")
-                                    //                       .classed("placed-cooldown", true)
-                                    //                       .attr("x", x + timeline.dotRadius)
-                                    //                       .attr("y", 2)
-                                    //                       .attr("width", timeline.selectedSkill.data.cooldown * timeline.hScale)
-                                    //                       .attr("height", timeline.dotRadius - 1)
-                                    //                       .style("fill", "#626daf")
-                                    //                       .style("stroke", "#727dbf");
-
-                                    // var placed = g.append("rect")
-                                    //               .classed("placed", true)
-                                    //               .attr("x", x)
-                                    //               .attr("width", 2*timeline.dotRadius)
-                                    //               .attr("height", 2*timeline.dotRadius)
-                                    //               .on("click", function() {
-                                    //                   d3.event.stopPropagation();
-                                    //                   d3.select(this).remove();
-                                    //                   return false;
-                                    //               });
-                                    // placed.call(d3.drag()
-                                    //               .on("drag", function() {
-                                    //                   var xCalc = d3.event.x - timeline.dotRadius;
-                                    //                   var xMax = (timeline.bounds.maxTime + (10 - timeline.bounds.maxTime % 10)) * timeline.hScale;// - timeline.dotRadius;
-                                    //                   var x = clamp(xOffset, xCalc, xMax);
-                                    //                   d3.select(this)
-                                    //                       .attr("x", x);
-                                    //               }));
-                                    
-
-                                    console.log(timeline.placed[timeline.selectedSkill.id]);
-                                    var placed = {
-                                        skill: timeline.selectedSkill,
-                                        time: x,
-                                        overlapping: false
-                                    }
-                                    if (timeline.placed[timeline.selectedSkill.id] === undefined) {
-                                        console.log("new skill")
-                                        placed.id = 0;
-                                        timeline.placed[timeline.selectedSkill.id] = [placed];
-                                    } else {
-                                        console.log("adding skill")
-                                        placed.id = timeline.placed[timeline.selectedSkill.id].length;
-                                        timeline.placed[timeline.selectedSkill.id].push(placed);
-                                    }
-
-                                    redrawSkills(g, xOffset);
-                               });
+                                         timeline.placed.push(placed);
+                                     });
                     g.append("rect")
                              .classed("planning-bar", true)
                              .attr("x", xOffset)
@@ -459,83 +377,9 @@
                              .attr("height", 2*timeline.dotRadius)
                              .style("cursor", "pointer")
                              .style("pointer-events", "all");
-
-
-                };
-
-                var redrawSkills = function(gParent, xOffset) {
-                    for (s in timeline.placed) {
-                        var g = gParent.append("g");
-                        // place duration bar
-                        g.selectAll('.placed-duration')
-                         .data(timeline.placed[s])
-                         .enter()
-                         .append("rect")
-                         .classed("placed-duration", true)
-                         .attr("x", function(d) { return d.time + timeline.dotRadius; })
-                         .attr("y", timeline.dotRadius + 1)
-                         .attr("width", timeline.selectedSkill.data.duration * timeline.hScale)
-                         .attr("height", timeline.dotRadius - 6)
-                         .style("fill", "#7f8ee2")
-                         .style("stroke", "#8f9ef2");
-                        
-                        // place cooldown bar
-                        g.selectAll('.placed-cooldown')
-                         .data(timeline.placed[s])
-                         .enter()
-                         .append("rect")
-                         .classed("placed-cooldown", true)
-                         .attr("x", function(d) { return d.time + timeline.dotRadius; })
-                         .attr("y", 8)
-                         .attr("width", timeline.selectedSkill.data.cooldown * timeline.hScale)
-                         .attr("height", timeline.dotRadius - 6)
-                         .style("fill", "#88b98e")
-                         .style("stroke", "#98c99e");
-                        
-                        // place node
-                        g.selectAll(".placed")
-                        .data(timeline.placed[s])
-                        .enter()
-                        .append("rect")
-                        .classed("placed", true)
-                        .attr("x", function(d) { return d.time; })
-                        .attr("width", 2*timeline.dotRadius)
-                        .attr("height", 2*timeline.dotRadius)
-                        .on("click", function(d) {
-                            timeline.placed[s].splice(timeline.placed[s].indexOf(d), 0);
-                            d3.event.stopPropagation();
-                            d3.select(this).remove();
-                            return false;
-                        }).call(d3.drag()
-                            .on("drag", function(d) {
-                                var xCalc = d3.event.x - timeline.dotRadius;
-                                var xMax = (timeline.bounds.maxTime + (10 - timeline.bounds.maxTime % 10)) * timeline.hScale;// - timeline.dotRadius;
-                                var x = clamp(xOffset, xCalc, xMax);
-                                // var x = clamp(0, xCalc, xMax);
-                                d3.select(this)
-                                    .attr("x", x);
-                            })
-                            .on("end", function(d) {
-                                console.log("not dragging anymore")
-                                redrawSkills(g, xOffset);
-                            }));
-                        
-                    }
-                };
-
-                var checkCooldownIntersection = function(placed, skill, position) {
-                    console.log(placed);
-                    console.log(skill);
-                    console.log(position);
-
-                    // check whether skill being placed would intersect the cooldown of any already placed skills
-                    // check whether the cooldown of the skill being placed would intersect already placed skills
-
-                    return true;
-                }
-
-                var initDragBehaviour = function(svg) {
-                    svg.call(d3.drag()
+                    
+                    // drag functionality
+                    container.call(d3.drag()
                              .on("drag", function() {
                                  var delta = startDragX - d3.event.x;
                                  $($('#container')[0]).scrollLeft(startScrollX + delta);
@@ -546,6 +390,58 @@
                              })
                              .on("end", function() {}));
                 };
+
+                var renderTimeline = function(container, timeline, xOffset) {
+                    var lineElevation = 0.25 * timeline.dotRadius;
+                    var timelineLine = d3.line()
+                                         .x(function(d) { return d.left; })
+                                         .y(function(d) { return d.top; });
+
+                    container.append("path")
+                             .attr("d", timelineLine([
+                                 { left: xOffset,
+                                   top: timeline.bounds.totalHeight + timeline.topPadding + timeline.bottomPadding - 40 - timeline.dotRadius },
+                                 { left: xOffset + (timeline.bounds.maxTime + (10 - timeline.bounds.maxTime % 10)) * timeline.hScale,
+                                   top: timeline.bounds.totalHeight + timeline.topPadding + timeline.bottomPadding - 40 - timeline.dotRadius }]))
+                             .attr("stroke", "grey")
+                             .attr("fill", "none");
+                    var i = 0;
+
+                    // draw time markers up to the next multiple of ten past the end
+                    while (i <= timeline.bounds.maxTime + (10 - timeline.bounds.maxTime % 10)) {
+                        var yCoefficient = (i % 10 == 0) ? 2 : 1;
+                        var strokeWidth = (i % 10 == 0) ? "2px" : "1px";
+                        var from = {
+                            left: xOffset + i * timeline.hScale, 
+                            top: timeline.bounds.totalHeight + timeline.topPadding + timeline.bottomPadding - 40 - timeline.dotRadius - yCoefficient * lineElevation
+                        }
+                        var to = {
+                            left: xOffset + i * timeline.hScale, 
+                            top: timeline.bounds.totalHeight + timeline.topPadding + timeline.bottomPadding - 40 - timeline.dotRadius + yCoefficient * lineElevation
+                        }
+
+                        container.append("path")
+                                 .attr("d", timelineLine([from, to]))
+                                 .attr("stroke", "grey")
+                                 .attr("fill", "none")
+                                 .style("stroke-width", strokeWidth);
+                        
+                        // apply a label every 10 segments
+                        if (i % 10 == 0) {
+                            text = container.append("text")
+                                     .classed("timeline-label", true)
+                                     .text(function(t) { return (i < 60) ? i + "s" : secondsAndMinutes(i); })
+                                     .attr("x", function(t) {
+                                        var translation = this.getComputedTextLength() / 2;
+                                        return xOffset + i * timeline.hScale - translation;
+                                     })
+                                     .attr("y", timeline.bounds.totalHeight + timeline.topPadding + timeline.bottomPadding - 40 - timeline.dotRadius - yCoefficient * lineElevation - 5)
+                        }
+                        
+                        i++;
+                    }
+                };
+
 
                 var recurseTimeline = function(data, previous, depth) {
                     var precurse = [];

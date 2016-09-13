@@ -180,3 +180,16 @@ body {
     fill: #444;
     stroke: #aaa;
 }
+
+.placed {
+    y: 1;
+    rx: 5;
+    ry: 5;
+    fill: #777;
+    stroke: black;
+    cursor: pointer;
+}
+
+.placed.ghost {
+    opacity: 0.5;
+}
