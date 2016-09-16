@@ -1,0 +1,82 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>FFXIV Raid Planner</title>
+        
+        <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Open+Sans" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+        
+        <script src="https://d3js.org/d3.v4.js"></script>
+        <!--<script src="https://d3js.org/d3.v4.min.js"></script>-->
+        <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
+        <script src="https://d3js.org/d3-path.v1.min.js"></script>
+        <script src="https://d3js.org/d3-drag.v1.min.js"></script>
+
+<style>
+
+text {
+  font: bold 48px monospace;
+}
+
+.enter {
+  fill: green;
+}
+
+.update {
+  fill: #333;
+}
+</style>
+
+<script>
+
+$(document).ready(function() {
+  // var alphabet = "abcdefghijklmnopqrstuvwxyz".split("");
+  var dotData = [];
+  for (var i = 0; i < 1; i++)
+    dotData.push({
+      x: Math.random()*200,
+      y: Math.random()*200,
+      r: 3
+    });
+
+  var svg = d3.select("svg"),
+      width = +svg.attr("width"),
+      height = +svg.attr("height"),
+      g = svg.append("g").attr("transform", "translate(32," + (height / 2) + ")");
+
+  function update(data) {
+    var dots = g.selectAll("circle")
+      .data(data);
+
+    dots.attr("class", "update");
+
+    dots.enter().append("circle")
+        .attr("class", "enter")
+        .attr("cx", function(d, i) { return d.x; })
+        .attr("cy", function(d) { return d.y; })
+        .attr("r", function(d) { return d.r; })
+
+    dots.exit().remove();
+  }
+
+  // The initial display.
+  update(dotData);
+
+  $("#generate").click(function() {
+    dotData.push({
+      x: Math.random()*200,
+      y: Math.random()*200,
+      r: 3
+    });
+    update(dotData);
+  });
+});
+
+</script>
+    </head>
+    <body>
+        <svg width="960" height="500"></svg>
+        <!--<div id="container"></div>-->
+        <button id="generate"></button>
+    </body>
+</html>

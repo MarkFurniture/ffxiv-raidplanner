@@ -36,6 +36,11 @@ body {
     cursor: -webkit-grabbing;
 }
 
+
+
+
+
+/* main timeline body */
 .timeline {
     display: inline-block;
     background: #ddd;
@@ -51,16 +56,6 @@ body {
 .event-object {
     position: absolute;
 }
-
-/*div.tooltip {
-    position: absolute;
-    width: 100px;
-    height: 100px;
-    padding: 10px;
-    background: white;
-    border: 1px solid grey;
-    border-radius: 5px;
-}*/
 
 div.hidden {
     top: 5px;
@@ -102,6 +97,10 @@ body {
     fill: #676fa2;
 }
 
+
+
+
+/* timeline tooltip */
 .tooltip .heading {
     font-size: 1.5em;
     font-weight: bold;
@@ -143,6 +142,10 @@ body {
     width: 50px;
 }
 
+
+
+
+/* bottom timeline */
 .timeline-label {
     font-family: 'Open Sans';
     font-size: 0.8em;
@@ -175,6 +178,10 @@ body {
     r: 7px;
 }
 
+
+
+
+/* planning bar */
 .planning-bar {
     /*fill: none;*/
     fill: #444;
@@ -190,6 +197,56 @@ body {
     cursor: pointer;
 }
 
+.placed.focused {
+    stroke: #fff;
+}
+
 .placed.ghost {
     opacity: 0.5;
+}
+
+.placed-duration {
+    fill: #6e8e73;
+    /*stroke: #444;*/
+}
+
+.placed-duration.hovered, .placed-duration.focused {
+    fill: #7fe28e;
+    /*stroke: #8ff29e;*/
+}
+
+.placed-cooldown {
+    fill: #717aad;
+    /*stroke: #444;*/
+}
+
+.placed-cooldown.hovered, .placed-cooldown.focused {
+    fill: #7f8ee2;
+    /*stroke: #8f9ef2;*/
+}
+
+.end-circle {
+    fill: #ff0;
+    stroke: #000;
+    opacity: 0;
+}
+
+.end-circle.hovered, .end-circle.focused {
+    opacity: 1;
+}
+
+.cooldown-block {
+    opacity: 0;
+}
+
+.cooldown-block.visible {
+    opacity: 0.2;
+}
+
+.cooldown-block.duration {
+    fill: #7fe28e;
+}
+
+.cooldown-block.cooldown {
+    fill: #717aad;
 }

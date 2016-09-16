@@ -301,5 +301,74 @@
             "cast_time": "Instant", 
             "icon": "whispering_dawn.png"
         }
+    },
+    "cross_class": {
+        "whm": {
+            "aero": {
+                "name": "Aero", 
+                "cooldown": 0, 
+                "duration": 0, 
+                "cast_time": "Instant", 
+                "icon": "aero.png"
+            },
+            "cure": {
+                "name": "Cure", 
+                "cooldown": 0, 
+                "duration": 0, 
+                "cast_time": "Instant", 
+                "icon": "cure.png"
+            },
+            "cleric_stance": {
+                "name": "Cleric Stance", 
+                "cooldown": 0, 
+                "duration": 0, 
+                "cast_time": "Instant", 
+                "icon": "cleric_stance.png"
+            },
+            "protect": {
+                "name": "Protect", 
+                "cooldown": 0, 
+                "duration": 0, 
+                "cast_time": "Instant", 
+                "icon": "protect.png"
+            },
+            "raise": {
+                "name": "Raise", 
+                "cooldown": 0, 
+                "duration": 0, 
+                "cast_time": "Instant", 
+                "icon": "raise.png"
+            },
+            "stoneskin": {
+                "name": "Stoneskin", 
+                "cooldown": 0, 
+                "duration": 0, 
+                "cast_time": "Instant", 
+                "icon": "stoneskin.png"
+            }
+        },
+        "blm": {
+            "blizzard_ii": {
+                "name": "Blizzard II", 
+                "cooldown": 0, 
+                "duration": 0, 
+                "cast_time": "Instant", 
+                "icon": "blizzard_ii.png"
+            },
+            "surecast": {
+                "name": "Surecast", 
+                "cooldown": 0, 
+                "duration": 0, 
+                "cast_time": "Instant", 
+                "icon": "surecast.png"
+            },
+            "swiftcast": {
+                "name": "Swiftcast", 
+                "cooldown": 0, 
+                "duration": 0, 
+                "cast_time": "Instant", 
+                "icon": "swiftcast.png"
+            }
+        }
     }
 }

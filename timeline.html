@@ -278,7 +278,7 @@
                              .attr("ry", function(n) { return timeline.dotRadius/3; })
                              .attr("width", function(n) { return timeline.dotRadius*2; })
                              .attr("height", function(n) { return timeline.dotRadius*2; })
-                            //  .style("fill", function(n) { return "url(#" + n.name + ")"; })
+                             .style("fill", function(n) { return "url(#" + n.name + ")"; })
                              .style("filter", "none")
                              .style("cursor", "pointer")
                              .on("mouseover", function(n) {
@@ -386,70 +386,29 @@
                                     //  .on("mouseleave", function() {
                                     //      d3.select(".placing").remove();
                                     //  })
-                               g.on("click", function() {
-
+                               g.on("click", function(d) {
                                     var xCalc = d3.event.x - timeline.dotRadius + $("#container").scrollLeft();
                                     var xMax = (timeline.bounds.maxTime + (10 - timeline.bounds.maxTime % 10)) * timeline.hScale;// - timeline.dotRadius;
                                     var x = clamp(xOffset, xCalc, xMax);
 
-                                    // if (!checkCooldownIntersection(timeline.placed, timeline.selectedSkill, x))
-                                    //     return false;
-
-                                    // var placedDuration = g.append("rect")
-                                    //                       .classed("placed-duration", true)
-                                    //                       .attr("x", x + timeline.dotRadius)
-                                    //                       .attr("y", timeline.dotRadius + 1)
-                                    //                       .attr("width", timeline.selectedSkill.data.duration * timeline.hScale)
-                                    //                       .attr("height", timeline.dotRadius - 1)
-                                    //                       .style("fill", "#7f8ee2")
-                                    //                       .style("stroke", "#8f9ef2");
-
-                                    // var placedCooldown = g.append("rect")
-                                    //                       .classed("placed-cooldown", true)
-                                    //                       .attr("x", x + timeline.dotRadius)
-                                    //                       .attr("y", 2)
-                                    //                       .attr("width", timeline.selectedSkill.data.cooldown * timeline.hScale)
-                                    //                       .attr("height", timeline.dotRadius - 1)
-                                    //                       .style("fill", "#626daf")
-                                    //                       .style("stroke", "#727dbf");
-
-                                    // var placed = g.append("rect")
-                                    //               .classed("placed", true)
-                                    //               .attr("x", x)
-                                    //               .attr("width", 2*timeline.dotRadius)
-                                    //               .attr("height", 2*timeline.dotRadius)
-                                    //               .on("click", function() {
-                                    //                   d3.event.stopPropagation();
-                                    //                   d3.select(this).remove();
-                                    //                   return false;
-                                    //               });
-                                    // placed.call(d3.drag()
-                                    //               .on("drag", function() {
-                                    //                   var xCalc = d3.event.x - timeline.dotRadius;
-                                    //                   var xMax = (timeline.bounds.maxTime + (10 - timeline.bounds.maxTime % 10)) * timeline.hScale;// - timeline.dotRadius;
-                                    //                   var x = clamp(xOffset, xCalc, xMax);
-                                    //                   d3.select(this)
-                                    //                       .attr("x", x);
-                                    //               }));
-                                    
-
-                                    console.log(timeline.placed[timeline.selectedSkill.id]);
                                     var placed = {
                                         skill: timeline.selectedSkill,
                                         time: x,
                                         overlapping: false
                                     }
                                     if (timeline.placed[timeline.selectedSkill.id] === undefined) {
-                                        console.log("new skill")
                                         placed.id = 0;
                                         timeline.placed[timeline.selectedSkill.id] = [placed];
                                     } else {
-                                        console.log("adding skill")
-                                        placed.id = timeline.placed[timeline.selectedSkill.id].length;
+                                        placed.id = timeline.placed[timeline.selectedSkill.id].length + 1;
                                         timeline.placed[timeline.selectedSkill.id].push(placed);
                                     }
 
-                                    redrawSkills(g, xOffset);
+                                    // TODO: loop through all placed skills
+                                    //       flag the most recently placed if overlapping
+                                    //       unflag any flagged skills if no longer overlapping 
+
+                                    redrawSkills(svg, g, xOffset);
                                });
                     g.append("rect")
                              .classed("planning-bar", true)
@@ -459,67 +418,170 @@
                              .attr("height", 2*timeline.dotRadius)
                              .style("cursor", "pointer")
                              .style("pointer-events", "all");
+                    
+                    // cooldown blocks
+                    svg.append("rect")
+                       .classed("cooldown-block", true)
+                       .classed("cooldown", true)
+                       .classed("visible", false)
+                       .attr("x", function(d) { return xOffset; })
+                       .attr("y", function(d) { return 2*timeline.dotRadius; })
+                       .attr("width", function(d) { return 0; })
+                       .attr("height", function(d) { return timeline.bounds.totalHeight + timeline.topPadding + timeline.bottomPadding - 40 - 3*timeline.dotRadius; })
+                       .moveToBack();
 
-
+                    svg.append("rect")
+                       .classed("cooldown-block", true)
+                       .classed("duration", true)
+                       .classed("visible", false)
+                       .attr("x", function(d) { return xOffset; })
+                       .attr("y", function(d) { return 2*timeline.dotRadius; })
+                       .attr("width", function(d) { return 0; })
+                       .attr("height", function(d) { return timeline.bounds.totalHeight + timeline.topPadding + timeline.bottomPadding - 40 - 3*timeline.dotRadius; })
+                       .moveToBack();
                 };
 
-                var redrawSkills = function(gParent, xOffset) {
+                var redrawSkills = function(svg, gParent, xOffset) {
                     for (s in timeline.placed) {
-                        var g = gParent.append("g");
-                        // place duration bar
-                        g.selectAll('.placed-duration')
-                         .data(timeline.placed[s])
-                         .enter()
-                         .append("rect")
-                         .classed("placed-duration", true)
-                         .attr("x", function(d) { return d.time + timeline.dotRadius; })
-                         .attr("y", timeline.dotRadius + 1)
-                         .attr("width", timeline.selectedSkill.data.duration * timeline.hScale)
-                         .attr("height", timeline.dotRadius - 6)
-                         .style("fill", "#7f8ee2")
-                         .style("stroke", "#8f9ef2");
+                        var thisSkill = timeline.placed[s];
+                        // add group for every skill
+                        var g = gParent.selectAll("g")
+                                       .data(thisSkill, function(d, i) {  return thisSkill.indexOf(d); });
+
+                        var skillGroup = g.enter()
+                                          .append("g")
+                                          .attr("transform", function(d) { return "translate(" + d.time + ", 0)"; })
+                                          .call(d3.drag()
+                                            .on("drag", function(d) {
+                                                var xMax = (timeline.bounds.maxTime + (10 - timeline.bounds.maxTime % 10)) * timeline.hScale;// - timeline.dotRadius;
+                                                var xCalc = d3.event.x - timeline.dotRadius;
+                                                var x = clamp(xOffset, xCalc, xMax);
+
+                                                d3.select(this)
+                                                  .attr("transform", function(d) { return "translate(" + x + ", 0)"; })
+                                                  .attr("x", x);
+                                                
+                                                d.time = x;
+
+                                                // duration box
+                                                svg.select(".cooldown-block.duration")
+                                                   .attr("x", x + timeline.dotRadius);
+                                                // cooldown box
+                                                svg.select(".cooldown-block.cooldown")
+                                                   .attr("x", x + d.skill.data.duration * timeline.hScale + timeline.dotRadius);
+                                            })
+                                            .on("start", function(d) {
+                                                dragStart = d.time;
+                                            })
+                                            .on("end", function(d) { }));;
+
+                        // add duration bar
+                        skillGroup.append("rect")
+                                  .classed("placed-duration", true)
+                                  .attr("x", function(d) { return timeline.dotRadius; })
+                                  .attr("y", 10)
+                                  .attr("width", function(d) { return d.skill.data.duration * timeline.hScale })
+                                  .attr("height", 4);
                         
-                        // place cooldown bar
-                        g.selectAll('.placed-cooldown')
-                         .data(timeline.placed[s])
-                         .enter()
-                         .append("rect")
-                         .classed("placed-cooldown", true)
-                         .attr("x", function(d) { return d.time + timeline.dotRadius; })
-                         .attr("y", 8)
-                         .attr("width", timeline.selectedSkill.data.cooldown * timeline.hScale)
-                         .attr("height", timeline.dotRadius - 6)
-                         .style("fill", "#88b98e")
-                         .style("stroke", "#98c99e");
+                        // add cooldown bar
+                        skillGroup.append("rect")
+                                  .classed("placed-cooldown", true)
+                                  .attr("x", function(d) { return timeline.dotRadius; })
+                                  .attr("y", 5)
+                                  .attr("width", timeline.selectedSkill.data.cooldown * timeline.hScale)
+                                  .attr("height", 4);
+
+                        // add duration circle
+                        skillGroup.append("circle")
+                                  .classed("end-circle", true)
+                                  .attr("cx", function(d) { return d.skill.data.duration * timeline.hScale + timeline.dotRadius; })
+                                  .attr("cy", 12)
+                                  .attr("r", 4);
                         
-                        // place node
-                        g.selectAll(".placed")
-                        .data(timeline.placed[s])
-                        .enter()
-                        .append("rect")
-                        .classed("placed", true)
-                        .attr("x", function(d) { return d.time; })
-                        .attr("width", 2*timeline.dotRadius)
-                        .attr("height", 2*timeline.dotRadius)
-                        .on("click", function(d) {
-                            timeline.placed[s].splice(timeline.placed[s].indexOf(d), 0);
-                            d3.event.stopPropagation();
-                            d3.select(this).remove();
-                            return false;
-                        }).call(d3.drag()
-                            .on("drag", function(d) {
-                                var xCalc = d3.event.x - timeline.dotRadius;
-                                var xMax = (timeline.bounds.maxTime + (10 - timeline.bounds.maxTime % 10)) * timeline.hScale;// - timeline.dotRadius;
-                                var x = clamp(xOffset, xCalc, xMax);
-                                // var x = clamp(0, xCalc, xMax);
-                                d3.select(this)
-                                    .attr("x", x);
-                            })
-                            .on("end", function(d) {
-                                console.log("not dragging anymore")
-                                redrawSkills(g, xOffset);
-                            }));
-                        
+                        // add cooldown circle
+                        skillGroup.append("circle")
+                                  .classed("end-circle", true)
+                                  .attr("cx", function(d) { return d.skill.data.cooldown * timeline.hScale + timeline.dotRadius; })
+                                  .attr("cy", 7)
+                                  .attr("r", 4);
+
+                        // add skill rect
+                        skillGroup.append("rect")
+                                  .classed("placed", true)
+                                  .attr("width", 2*timeline.dotRadius)
+                                  .attr("height", 2*timeline.dotRadius)
+                                  .on("click", function(d) {
+                                      d3.event.stopPropagation();
+
+                                      if (timeline.focusedSkill == d) {
+                                          timeline.focusedSkill = null;
+                                          
+                                          gParent.selectAll(".focused")
+                                                 .classed("focused", false);
+
+                                          svg.selectAll(".cooldown-block")
+                                             .classed("visible", false);
+                                      } else {
+                                          gParent.selectAll(".focused")
+                                                 .classed("focused", false);
+                                          
+                                          console.log(gParent.selectAll(".focused"))
+                                          timeline.focusedSkill = d;
+
+                                          // highlight new node
+                                          var parent = d3.select(this.parentNode)
+                                          parent.moveToFront();
+                                          parent.selectAll(".placed,.placed-duration,.placed-cooldown,.end-circle")
+                                                  .classed("focused", true);
+                                          
+                                          // adjust cooldown block
+                                          svg.select(".cooldown-block.duration")
+                                             .classed("visible", true)
+                                             .attr("x", function(d) { return timeline.focusedSkill.time + timeline.dotRadius; })
+                                             .attr("width", function(d) { return timeline.focusedSkill.skill.data.duration * timeline.hScale; });
+                                          svg.select(".cooldown-block.cooldown")
+                                             .classed("visible", true)
+                                             .attr("x", function(d) { return timeline.focusedSkill.time + timeline.focusedSkill.skill.data.duration * timeline.hScale + timeline.dotRadius; })
+                                             .attr("width", function(d) { return (timeline.focusedSkill.skill.data.cooldown - timeline.focusedSkill.skill.data.duration) * timeline.hScale; });
+                                      }
+
+                                      return false;
+                                  })
+                                  .on("dblclick", function(d) {
+                                      d3.event.stopPropagation();
+                                      if (thisSkill.indexOf(d) > -1)
+                                          thisSkill.splice(thisSkill.indexOf(d), 1);
+                                      
+                                      svg.selectAll(".cooldown-block")
+                                         .classed("visible", false);
+
+                                      redrawSkills(svg, gParent, xOffset);
+                                      return false;
+                                  })
+                                  .on("mouseover", function(d) {
+                                      // unfocus previously focused segment
+                                      if (timeline.hoveredSkill && timeline.hoveredSkill != d)
+                                          gParent.selectAll(".hovered")
+                                                 .classed("hovered", false);
+                                      
+                                      // focus new skill
+                                      timeline.hoveredSkill = d;
+                                      
+                                      var parent = d3.select(this.parentNode)
+                                      parent.moveToFront();
+                                      parent.selectAll(".placed-duration,.placed-cooldown,.end-circle")
+                                            .classed("hovered", true);
+
+                                      redrawSkills(svg, gParent, xOffset);
+                                  })
+                                  .on("mouseout", function(d) {
+                                      var parent = d3.select(this.parentNode)
+                                      parent.moveToFront();
+                                      parent.selectAll(".placed-duration,.placed-cooldown,.end-circle")
+                                            .classed("hovered", false);
+                                  });
+
+                        g.exit().remove();
                     }
                 };
 
